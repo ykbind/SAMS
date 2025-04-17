@@ -5,51 +5,192 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance Records</title>
     <style>
+        * { box-sizing: border-box; }
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            background: linear-gradient(120deg, #f6d365 0%, #fda085 100%);
+            min-height: 100vh;
+        }
+        .header-bar {
+            background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+            color: #111 !important;
+            padding: 24px 0 16px 0;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(78,84,200,0.08);
+            letter-spacing: 2px;
+        }
+        .main-content {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 16px;
         }
         h1 {
-            color: #333;
+            color: #4e54c8;
+            margin-top: 0;
+            text-align: center;
         }
         table {
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 32px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            overflow: hidden;
         }
         th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
+            border-bottom: 1px solid #eee;
+            padding: 16px 12px;
             text-align: left;
         }
         th {
-            background-color: #f2f2f2;
+            background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+            color: #fff;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        tr:last-child td {
+            border-bottom: none;
         }
         img {
-            width: 100px;
+            width: 80px;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(78,84,200,0.10);
+            background: #f2f2f2;
+            padding: 4px;
+        }
+        .total-attended {
+            margin-top: 24px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #4e54c8;
+            text-align: right;
+        }
+        .view-photo-btn {
+            background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+            color: #fff;
+            border: none;
+            font-weight: 600;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 2px 8px rgba(78,84,200,0.08);
+            margin: 0;
+        }
+        .view-photo-btn:hover {
+            background: linear-gradient(90deg, #8f94fb 0%, #4e54c8 100%);
+            transform: translateY(-2px) scale(1.03);
+        }
+        @media (max-width: 700px) {
+            .main-content {
+                padding: 0 4px;
+            }
+            table, th, td {
+                font-size: 0.95rem;
+            }
+            img {
+                width: 50px;
+            }
+        }
+        .back-btn {
+            display: inline-block;
+            margin: 32px 0 0 0;
+            padding: 12px 28px;
+            background: linear-gradient(90deg, #8f94fb 0%, #4e54c8 100%);
+            color: #fff;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 8px rgba(78,84,200,0.10);
+            transition: background 0.2s, transform 0.1s;
+            border: none;
+            cursor: pointer;
+        }
+        .back-btn:hover {
+            background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+            transform: translateY(-2px) scale(1.03);
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
-    <h1>Attendance Records</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Roll No</th>
-                <th>Photo</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for record in records %}
+    <div class="header-bar">
+        <h1 style="color:#111;">Attendance Records</h1>
+    </div>
+    <div class="main-content">
+        <table>
+            <thead>
                 <tr>
-                    <td>{{ record.student_name }}</td>
-                    <td>{{ record.roll_no }}</td>
-                    <td><img src="{{ url_for('static', filename=record.photo) }}" alt="Photo"></td>
+                    <th>Name</th>
+                    <th>Roll No</th>
+                    <th>Photo</th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <p>Total Attended: {{ records|length }}</p>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                    <tr>
+                        <td>{{ record.student_name }}</td>
+                        <td>{{ record.roll_no }}</td>
+                        <td>
+                            {% if record.photo %}
+                                {# Fix Windows backslash in path for Flask static serving #}
+                                <button class="view-photo-btn" type="button"
+                                    data-photo="{{ url_for('static', filename=record.photo.lstrip('/').replace('static/', '').replace('\\', '/')) }}">
+                                    View Photo
+                                </button>
+                            {% else %}
+                                No Photo
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="total-attended">
+            Total Attended: {{ records|length }}
+        </div>
+        <a href="{{ url_for('admin') }}" class="back-btn">← Back to Admin</a>
+        <!-- Modal for photo preview -->
+        <div id="photoModal" style="display:none;position:fixed;z-index:1000;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;">
+            <div style="background:#fff;width:700px;height:500px;max-width:98vw;max-height:90vh;padding:32px 32px 24px 32px;border-radius:16px;box-shadow:0 4px 32px rgba(0,0,0,0.22);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;">
+                <div style="flex:1;display:flex;align-items:center;justify-content:center;width:100%;height:100%;">
+                    <img id="modalImg" src="" alt="Photo" style="display:block;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain;border-radius:14px;box-shadow:0 2px 16px rgba(78,84,200,0.12);">
+                </div>
+                <button onclick="closeModal()" style="background:#4e54c8;color:#fff;padding:14px 40px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:1.2rem;margin-top:12px;">Close</button>
+            </div>
+        </div>
+        <script>
+            function closeModal() {
+                document.getElementById('photoModal').style.display = 'none';
+                document.getElementById('modalImg').src = '';
+            }
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('.view-photo-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        var imgSrc = btn.getAttribute('data-photo');
+                        var modal = document.getElementById('photoModal');
+                        var modalImg = document.getElementById('modalImg');
+                        // Fix: set src first, then show modal after image loads
+                        modalImg.onload = function() {
+                            modal.style.display = 'flex';
+                        };
+                        modalImg.src = imgSrc;
+                        // If cached, onload may not fire, so show modal if already loaded
+                        if (modalImg.complete) {
+                            modal.style.display = 'flex';
+                        }
+                    });
+                });
+                // Close modal on background click
+                document.getElementById('photoModal').addEventListener('click', function(e) {
+                    if (e.target === this) closeModal();
+                });
+            });
+        </script>
+    </div>
 </body>
 </html>

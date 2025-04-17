@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, jsonify, url_for, redirect
-from flask_socketio import SocketIO, emit
 from datetime import datetime
 import qrcode
 import json
@@ -8,6 +7,15 @@ import base64
 from io import BytesIO
 import logging
 from werkzeug.utils import secure_filename
+
+try:
+    from flask_socketio import SocketIO, emit
+except ImportError:
+    raise ImportError(
+        "Flask-SocketIO is not installed. Please install it by running:\n"
+        "    pip install flask-socketio\n"
+        "or check your virtual environment."
+    )
 
 # Configure logging to console
 logging.basicConfig(
@@ -115,8 +123,17 @@ def attendance_form():
                 'error': 'Invalid file type. Only PNG, JPG, JPEG allowed'
             }), 400
 
-        # Save photo with secure filename
-        filename = secure_filename(f"student_{data['roll_no']}.jpg")
+        # Save photo with secure filename including lecture, date, and time
+        lecture_name = data['lecture_name']
+        date = data['date']
+        time = data['time']
+        roll_no = data['roll_no']
+        # Sanitize all parts for filename
+        def sanitize(s):
+            return "".join(c for c in s if c.isalnum() or c in ('-', '_')).rstrip()
+        filename = secure_filename(
+            f"student_{sanitize(roll_no)}_{sanitize(lecture_name)}_{sanitize(date)}_{sanitize(time)}.jpg"
+        )
         photo_path = os.path.join('uploads', filename)
         absolute_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         
@@ -129,11 +146,11 @@ def attendance_form():
         
         # Add new attendance record
         new_attendance = {
-            'lecture_name': data['lecture_name'],
-            'date': data['date'],
-            'time': data['time'],
+            'lecture_name': lecture_name,
+            'date': date,
+            'time': time,
             'student_name': data['name'],
-            'roll_no': data['roll_no'],
+            'roll_no': roll_no,
             'photo': photo_path
         }
         attendance_records.append(new_attendance)
@@ -145,7 +162,7 @@ def attendance_form():
         else:
             success_message = 'Failed to save attendance data'
             
-        return render_template('attendance_form.html', lecture_name=data['lecture_name'], date=data['date'], time=data['time'], success_message=success_message)
+        return render_template('attendance_form.html', lecture_name=lecture_name, date=date, time=time, success_message=success_message)
     
     lecture_name = request.args.get('lecture_name')
     date = request.args.get('date')
@@ -166,8 +183,16 @@ def submit_attendance():
                 'error': 'Invalid file type. Only PNG, JPG, JPEG allowed'
             }), 400
 
-        # Save photo with secure filename
-        filename = secure_filename(f"student_{data['roll_no']}.jpg")
+        # Save photo with secure filename including lecture, date, and time
+        lecture_name = data['lecture_name']
+        date = data['date']
+        time = data['time']
+        roll_no = data['roll_no']
+        def sanitize(s):
+            return "".join(c for c in s if c.isalnum() or c in ('-', '_')).rstrip()
+        filename = secure_filename(
+            f"student_{sanitize(roll_no)}_{sanitize(lecture_name)}_{sanitize(date)}_{sanitize(time)}.jpg"
+        )
         photo_path = os.path.join('uploads', filename)
         absolute_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         
@@ -180,11 +205,11 @@ def submit_attendance():
         
         # Add new attendance record
         new_attendance = {
-            'lecture_name': data['lecture_name'],
-            'date': data['date'],
-            'time': data['time'],
+            'lecture_name': lecture_name,
+            'date': date,
+            'time': time,
             'student_name': data['name'],
-            'roll_no': data['roll_no'],
+            'roll_no': roll_no,
             'photo': photo_path
         }
         attendance_records.append(new_attendance)

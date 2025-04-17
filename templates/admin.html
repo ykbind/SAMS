@@ -5,56 +5,122 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Attendance Records</title>
     <style>
+        * { box-sizing: border-box; }
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            background: linear-gradient(120deg, #f6d365 0%, #fda085 100%);
+            min-height: 100vh;
+        }
+        .header-bar {
+            background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+            color: #111 !important;
+            padding: 24px 0 16px 0;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(78,84,200,0.08);
+            letter-spacing: 2px;
+        }
+        .main-content {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 16px;
         }
         h1 {
-            color: #333;
+            color: #4e54c8;
+            margin-top: 0;
+            text-align: center;
         }
         table {
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 32px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            overflow: hidden;
         }
         th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
+            border-bottom: 1px solid #eee;
+            padding: 16px 12px;
             text-align: left;
         }
         th {
-            background-color: #f2f2f2;
+            background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+            color: #fff;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        tr:last-child td {
+            border-bottom: none;
         }
         a {
-            color: #4CAF50;
+            color: #4e54c8;
             text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
         }
         a:hover {
+            color: #fda085;
             text-decoration: underline;
+        }
+        @media (max-width: 700px) {
+            .main-content {
+                padding: 0 4px;
+            }
+            table, th, td {
+                font-size: 0.95rem;
+            }
+        }
+        .refresh-btn {
+            background: linear-gradient(90deg, #8f94fb 0%, #4e54c8 100%);
+            color: #fff;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 8px rgba(78,84,200,0.10);
+            transition: background 0.5s, transform 0.5s;
+            border: none;
+            cursor: pointer;
+            padding: 12px 28px;
+            display: inline-block;
+        }
+        .refresh-btn:hover {
+            background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+            transform: translateY(-2px) scale(1.03);
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
-    <h1>Admin - Attendance Records</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Lecture Name</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for (lecture_name, date, time), records in lectures.items() %}
+    <div class="header-bar">
+        <h1 style="color:#111;">Admin - Attendance Records</h1>
+    </div>
+    <div class="main-content">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:18px;">
+            <a href="{{ url_for('admin') }}" class="refresh-btn">⟳ Refresh</a>
+        </div>
+        <table>
+            <thead>
                 <tr>
-                    <td>{{ lecture_name }}</td>
-                    <td>{{ date }}</td>
-                    <td>{{ time }}</td>
-                    <td><a href="{{ url_for('show_attendance', lecture_name=lecture_name, date=date, time=time) }}">Show Attendance</a></td>
+                    <th>Lecture Name</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Actions</th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                {% for (lecture_name, date, time), records in lectures.items() %}
+                    <tr>
+                        <td>{{ lecture_name }}</td>
+                        <td>{{ date }}</td>
+                        <td>{{ time }}</td>
+                        <td><a href="{{ url_for('show_attendance', lecture_name=lecture_name, date=date, time=time) }}">Show Attendance</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>

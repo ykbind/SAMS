@@ -5,33 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Attendance</title>
     <style>
+        /* Reset some defaults */
+        * {
+            box-sizing: border-box;
+        }
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f9f9f9;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            background: linear-gradient(120deg, #f6d365 0%, #fda085 100%);
+            min-height: 100vh;
+        }
+        .header-bar {
+            background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+            color: #111 !important;
+            padding: 24px 0 16px 0;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(78,84,200,0.08);
+            letter-spacing: 2px;
         }
         h1, h2, h3 {
-            color: #333;
+            color: #222;
+            margin-top: 0;
+        }
+        .main-content {
+            max-width: 1100px;
+            margin: 32px auto;
+            padding: 0 16px;
         }
         form {
-            margin-bottom: 20px;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 32px;
+            background: #fff;
+            padding: 32px 24px 24px 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            align-items: flex-end;
         }
         label {
             display: block;
-            margin-top: 10px;
-            font-weight: bold;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4e54c8;
+            letter-spacing: 1px;
         }
         input, button {
-            padding: 10px;
-            margin-top: 5px;
+            padding: 12px;
+            margin-top: 0;
             width: 100%;
-            max-width: 300px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            max-width: 320px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        input:focus {
+            border-color: #8f94fb;
+            outline: none;
         }
         input[type="date"] {
             max-width: 200px;
@@ -40,43 +71,107 @@
             max-width: 150px;
         }
         button {
-            background-color: #4CAF50;
-            color: white;
+            background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+            color: #fff;
             border: none;
+            font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 2px 8px rgba(78,84,200,0.08);
         }
         button:hover {
-            background-color: #45a049;
-        }
-        img {
-            margin-top: 20px;
-            max-width: 100%;
-            height: auto;
+            background: linear-gradient(90deg, #8f94fb 0%, #4e54c8 100%);
+            transform: translateY(-2px) scale(1.03);
         }
         .container {
             display: flex;
+            flex-wrap: wrap;
+            gap: 32px;
             justify-content: space-between;
         }
         .left, .right {
             width: 48%;
+            min-width: 320px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            padding: 32px 24px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .card h2 {
+            color: #4e54c8;
+            margin-bottom: 16px;
+        }
+        img {
+            margin-top: 20px;
+            max-width: 220px;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(78,84,200,0.10);
+            background: #f2f2f2;
+            padding: 8px;
         }
         .attendance-list {
-            margin-top: 20px;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background: #fff;
+            padding: 32px 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        }
+        .attendance-list h2 {
+            color: #4e54c8;
+            margin-bottom: 16px;
         }
         .attendance-list ul {
             list-style-type: none;
             padding: 0;
+            margin: 0;
         }
         .attendance-list li {
-            background-color: #f2f2f2;
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 5px;
+            background: linear-gradient(90deg, #f6d365 0%, #fda085 100%);
+            margin-bottom: 12px;
+            padding: 14px 18px;
+            border-radius: 8px;
+            font-weight: 500;
+            color: #333;
+            box-shadow: 0 1px 4px rgba(253,160,133,0.08);
+            transition: background 0.2s;
+        }
+        .attendance-list li:last-child {
+            margin-bottom: 0;
+        }
+        .attendance-list li:hover {
+            background: linear-gradient(90deg, #8f94fb 0%, #4e54c8 100%);
+            color: #fff;
+        }
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+            }
+            .left, .right {
+                width: 100%;
+            }
+        }
+        .new-lecture-btn {
+            background: linear-gradient(90deg, #8f94fb 0%, #4e54c8 100%);
+            color: #fff;
+            font-weight: 600;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 8px rgba(78,84,200,0.10);
+            transition: background 0.2s, transform 0.1s;
+            border: none;
+            cursor: pointer;
+            padding: 12px 28px;
+            display: inline-block;
+        }
+        .new-lecture-btn:hover {
+            background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+            transform: translateY(-2px) scale(1.03);
+            text-decoration: none;
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
@@ -87,7 +182,7 @@
             if (dateInput) {
                 const today = new Date().toISOString().split('T')[0];
                 dateInput.setAttribute('max', today);
-            }
+            }   
 
             {% if lecture_name and date and time %}
                 // Setup Socket.IO for receiving live attendance updates
@@ -97,36 +192,58 @@
     </script>
 </head>
 <body>
-    <h1>Generate QR Code for Attendance</h1>
-    {% if show_form %}
-        <form method="POST" action="/">
-            <label for="lecture_name">Lecture Name:</label>
-            <input type="text" id="lecture_name" name="lecture_name" required><br>
-            <label for="date">Date:</label>
-            <input type="date" id="date" name="date" required><br>
-            <label for="time">Time:</label>
-            <input type="time" id="time" name="time" required><br>
-            <button type="submit">Generate QR Code</button>
-        </form>
-    {% endif %}
-    <div class="container">
-        <div class="left">
-            {% if qr_code %}
-                <h2>Scan this QR Code</h2>
-                <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code">
-                <h3>Lecture: {{ lecture_name }}</h3>
-                <h3>Date: {{ date }}</h3>
-                <h3>Time: {{ time }}</h3>
-            {% endif %}
+    <div class="header-bar">
+        <h1 style="color:#111;">Smart Attendance Monitoring System</h1>
+        <div style="font-size:1.1rem; font-weight:400; letter-spacing:1px; margin-top:8px; color:#111;">
+            Seamless, real-time attendance tracking for your lectures
         </div>
-        <div class="right">
-            <div class="attendance-list">
-                <h2>Live Attendance</h2>
-                <ul>
-                    {% for record in records %}
-                        <li>{{ record.student_name }} ({{ record.roll_no }})</li>
-                    {% endfor %}
-                </ul>
+    </div>
+    <div class="main-content">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:18px;">
+            <a href="{{ url_for('index') }}" class="new-lecture-btn">+ New Lecture</a>
+        </div>
+        {% if show_form %}
+            <form method="POST" action="/">
+                <div style="flex:1; min-width:220px;">
+                    <label for="lecture_name">Lecture Name:</label>
+                    <input type="text" id="lecture_name" name="lecture_name" required>
+                </div>
+                <div style="flex:1; min-width:160px;">
+                    <label for="date">Date:</label>
+                    <input type="date" id="date" name="date" required>
+                </div>
+                <div style="flex:1; min-width:120px;">
+                    <label for="time">Time:</label>
+                    <input type="time" id="time" name="time" required>
+                </div>
+                <div style="flex:1; min-width:120px;">
+                    <button type="submit">Generate QR Code</button>
+                </div>
+            </form>
+        {% endif %}
+        <div class="container">
+            <div class="left">
+                {% if qr_code %}
+                    <div class="card">
+                        <h2>Scan this QR Code</h2>
+                        <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code">
+                        <h3>Lecture: {{ lecture_name }}</h3>
+                        <h3>Date: {{ date }}</h3>
+                        <h3>Time: {{ time }}</h3>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="right">
+                {% if qr_code %}
+                <div class="attendance-list">
+                    <h2>Live Attendance</h2>
+                    <ul>
+                        {% for record in records %}
+                            <li>{{ record.student_name }} ({{ record.roll_no }})</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
