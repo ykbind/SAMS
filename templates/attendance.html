@@ -4,33 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance Records</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
-        * { box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            margin: 0;
-            background: linear-gradient(120deg, #f6d365 0%, #fda085 100%);
-            min-height: 100vh;
-        }
-        .header-bar {
-            background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
-            color: #111 !important;
-            padding: 24px 0 16px 0;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(78,84,200,0.08);
-            letter-spacing: 2px;
-        }
-        .main-content {
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 0 16px;
-        }
-        h1 {
-            color: #4e54c8;
-            margin-top: 0;
-            text-align: center;
-        }
-        table {
+        .attendance-table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
@@ -40,36 +17,29 @@
             box-shadow: 0 4px 24px rgba(0,0,0,0.08);
             overflow: hidden;
         }
-        th, td {
+        .attendance-table th, .attendance-table td {
             border-bottom: 1px solid #eee;
             padding: 16px 12px;
             text-align: left;
         }
-        th {
+        .attendance-table th {
             background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
             color: #fff;
             font-weight: 600;
             letter-spacing: 1px;
         }
-        tr:last-child td {
+        .attendance-table tr:last-child td {
             border-bottom: none;
         }
-        img {
+        .attendance-table img {
             width: 80px;
             border-radius: 8px;
             box-shadow: 0 1px 4px rgba(78,84,200,0.10);
             background: #f2f2f2;
             padding: 4px;
         }
-        .total-attended {
-            margin-top: 24px;
-            font-size: 1.1rem;
-            font-weight: 500;
-            color: #4e54c8;
-            text-align: right;
-        }
-        .view-photo-btn {
-            background: linear-gradient(90deg, #4e54c8 0%, #8f94fb 100%);
+        .attendance-table .cta-button {
+            background: #3498db;
             color: #fff;
             border: none;
             font-weight: 600;
@@ -79,19 +49,40 @@
             transition: background 0.2s, transform 0.1s;
             box-shadow: 0 2px 8px rgba(78,84,200,0.08);
             margin: 0;
+            text-decoration: none;
         }
-        .view-photo-btn:hover {
+        .attendance-table .cta-button:hover {
             background: linear-gradient(90deg, #8f94fb 0%, #4e54c8 100%);
             transform: translateY(-2px) scale(1.03);
         }
+        .delete-btn {
+            background: #e74c3c;
+            color: #fff;
+            border: none;
+            font-weight: 600;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 2px 8px rgba(231,76,60,0.08);
+            margin-left: 8px;
+        }
+        .delete-btn:hover {
+            background: #c0392b;
+            transform: translateY(-2px) scale(1.03);
+        }
+        .total-attended {
+            margin-top: 24px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #4e54c8;
+            text-align: right;
+        }
         @media (max-width: 700px) {
-            .main-content {
-                padding: 0 4px;
-            }
-            table, th, td {
+            .attendance-table, .attendance-table th, .attendance-table td {
                 font-size: 0.95rem;
             }
-            img {
+            .attendance-table img {
                 width: 50px;
             }
         }
@@ -118,16 +109,25 @@
     </style>
 </head>
 <body>
-    <div class="header-bar">
-        <h1 style="color:#111;">Attendance Records</h1>
-    </div>
-    <div class="main-content">
-        <table>
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="logo">SAMS</div>
+            <div class="nav-links">
+                <a href="{{ url_for('index') }}" class="nav-link">Home</a>
+                <a href="{{ url_for('teacher') }}" class="nav-link">Teacher Section</a>
+                <a href="{{ url_for('admin') }}" class="nav-link">Admin Section</a>
+            </div>
+        </div>
+    </nav>
+    <main class="main-content">
+        <h1 class="title">Attendance Records</h1>
+        <table class="attendance-table">
             <thead>
                 <tr>
                     <th>Name</th>
                     <th>Roll No</th>
                     <th>Photo</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -137,14 +137,19 @@
                         <td>{{ record.roll_no }}</td>
                         <td>
                             {% if record.photo %}
-                                {# Fix Windows backslash in path for Flask static serving #}
-                                <button class="view-photo-btn" type="button"
+                                <button class="cta-button" type="button"
                                     data-photo="{{ url_for('static', filename=record.photo.lstrip('/').replace('static/', '').replace('\\', '/')) }}">
                                     View Photo
                                 </button>
                             {% else %}
                                 No Photo
                             {% endif %}
+                        </td>
+                        <td>
+                            <form method="POST" action="{{ url_for('show_attendance', lecture_name=record.lecture_name, date=record.date, time=record.time) }}" style="display:inline;">
+                                <input type="hidden" name="delete_roll_no" value="{{ record.roll_no }}">
+                                <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete this record?');">Delete</button>
+                            </form>
                         </td>
                     </tr>
                 {% endfor %}
@@ -154,13 +159,12 @@
             Total Attended: {{ records|length }}
         </div>
         <a href="{{ url_for('admin') }}" class="back-btn">← Back to Admin</a>
-        <!-- Modal for photo preview -->
         <div id="photoModal" style="display:none;position:fixed;z-index:1000;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;">
             <div style="background:#fff;width:700px;height:500px;max-width:98vw;max-height:90vh;padding:32px 32px 24px 32px;border-radius:16px;box-shadow:0 4px 32px rgba(0,0,0,0.22);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;">
                 <div style="flex:1;display:flex;align-items:center;justify-content:center;width:100%;height:100%;">
                     <img id="modalImg" src="" alt="Photo" style="display:block;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain;border-radius:14px;box-shadow:0 2px 16px rgba(78,84,200,0.12);">
                 </div>
-                <button onclick="closeModal()" style="background:#4e54c8;color:#fff;padding:14px 40px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:1.2rem;margin-top:12px;">Close</button>
+                <button onclick="closeModal()" class="cta-button" style="margin-top:12px;">Close</button>
             </div>
         </div>
         <script>
@@ -169,28 +173,25 @@
                 document.getElementById('modalImg').src = '';
             }
             document.addEventListener('DOMContentLoaded', function() {
-                document.querySelectorAll('.view-photo-btn').forEach(function(btn) {
+                document.querySelectorAll('.cta-button[data-photo]').forEach(function(btn) {
                     btn.addEventListener('click', function() {
                         var imgSrc = btn.getAttribute('data-photo');
                         var modal = document.getElementById('photoModal');
                         var modalImg = document.getElementById('modalImg');
-                        // Fix: set src first, then show modal after image loads
                         modalImg.onload = function() {
                             modal.style.display = 'flex';
                         };
                         modalImg.src = imgSrc;
-                        // If cached, onload may not fire, so show modal if already loaded
                         if (modalImg.complete) {
                             modal.style.display = 'flex';
                         }
                     });
                 });
-                // Close modal on background click
                 document.getElementById('photoModal').addEventListener('click', function(e) {
                     if (e.target === this) closeModal();
                 });
             });
         </script>
-    </div>
+    </main>
 </body>
 </html>

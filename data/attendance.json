@@ -1,18 +1,1 @@
-[
-    {
-        "lecture_name": "maths",
-        "date": "2025-04-17",
-        "time": "20:15",
-        "student_name": "Yash Bankar",
-        "roll_no": "100",
-        "photo": "uploads\\student_100_maths_2025-04-17_2015.jpg"
-    },
-    {
-        "lecture_name": "maths",
-        "date": "2025-04-17",
-        "time": "20:15",
-        "student_name": "Yash ",
-        "roll_no": "101",
-        "photo": "uploads\\student_101_maths_2025-04-17_2015.jpg"
-    }
-]
+[]

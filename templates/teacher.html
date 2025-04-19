@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Attendance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='js/socket_client.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateInput = document.getElementById('date');
+            if (dateInput) {
+                const today = new Date().toISOString().split('T')[0];
+                dateInput.setAttribute('max', today);
+            }
+            {% if lecture_name and date and time %}
+                const socket = setupSocketIO('{{ lecture_name }}', '{{ date }}', '{{ time }}');
+            {% endif %}
+        });
+    </script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="logo">SAMS</div>
+            <div class="nav-links">
+                <a href="{{ url_for('index') }}" class="nav-link">Home</a>
+                <a href="{{ url_for('teacher') }}" class="nav-link">Teacher Section</a>
+                <a href="{{ url_for('admin') }}" class="nav-link">Admin Section</a>
+            </div>
+        </div>
+    </nav>
+    <main class="main-content">
+        <h1 class="title">Smart Attendance Monitoring System</h1>
+        <p class="description" style="text-align:center;">
+            Seamless, real-time attendance tracking for your lectures.
+        </p>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:18px;">
+            <a href="{{ url_for('index') }}" class="cta-button">+ New Lecture</a>
+        </div>
+        {% if show_form %}
+            <form method="POST" action="/teacher" style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-end;justify-content:center;">
+                <div class="lecture-details" style="flex:1; min-width:220px; max-width:400px;">
+                    <label for="lecture_name">Lecture Name:</label>
+                    <input type="text" id="lecture_name" name="lecture_name" required class="input-lg">
+                    <label for="date" style="margin-top:1rem;">Date:</label>
+                    <input type="date" id="date" name="date" required class="input-lg">
+                    <label for="time" style="margin-top:1rem;">Time:</label>
+                    <input type="time" id="time" name="time" required class="input-lg">
+                    <button type="submit" class="cta-button" style="margin-top:1.5rem;width:100%;">Generate QR Code</button>
+                </div>
+            </form>
+        {% endif %}
+        <div class="container" style="display:flex;flex-wrap:wrap;gap:32px;justify-content:space-between;">
+            <div class="left" style="width:48%;min-width:320px;">
+                {% if qr_code %}
+                    <div class="card" style="background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.08);padding:32px 24px;margin-bottom:24px;text-align:center;">
+                        <h2 style="color:#4e54c8;margin-bottom:16px;">Scan this QR Code</h2>
+                        <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" style="margin-top:20px;max-width:220px;height:auto;border-radius:12px;box-shadow:0 2px 12px rgba(78,84,200,0.10);background:#f2f2f2;padding:8px;">
+                        <h3>Lecture: {{ lecture_name }}</h3>
+                        <h3>Date: {{ date }}</h3>
+                        <h3>Time: {{ time }}</h3>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="right" style="width:48%;min-width:320px;">
+                {% if qr_code %}
+                <div class="attendance-list" style="background:#fff;padding:32px 24px;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+                    <h2 style="color:#4e54c8;margin-bottom:16px;">Live Attendance</h2>
+                    <ul style="list-style-type:none;padding:0;margin:0;">
+                        {% for record in records %}
+                            <li style="background:linear-gradient(90deg,#f6d365 0%,#fda085 100%);margin-bottom:12px;padding:14px 18px;border-radius:8px;font-weight:500;color:#333;box-shadow:0 1px 4px rgba(253,160,133,0.08);transition:background 0.2s;">
+                                {{ record.student_name }} ({{ record.roll_no }})
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</body>
+</html>

@@ -75,8 +75,8 @@ def save_json_file(file_path, data):
                 pass
         return False
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
+@app.route('/teacher', methods=['GET', 'POST'])
+def teacher():
     if request.method == 'POST':
         lecture_name = request.form['lecture_name']
         date = request.form['date']
@@ -105,9 +105,13 @@ def index():
         attendance_records = load_json_file(ATTENDANCE_FILE, [])
         filtered_records = [record for record in attendance_records if record['lecture_name'] == lecture_name and record['date'] == date and record['time'] == time]
         
-        return render_template('index.html', qr_code=img_str, lecture_name=lecture_name, date=date, time=time, records=filtered_records, show_form=False)
+        return render_template('teacher.html', qr_code=img_str, lecture_name=lecture_name, date=date, time=time, records=filtered_records, show_form=False)
     
-    return render_template('index.html', records=[], show_form=True)
+    return render_template('teacher.html', records=[], show_form=True)
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    return render_template('index.html')
 
 @app.route('/attendance-form', methods=['GET', 'POST'])
 def attendance_form():
@@ -236,10 +240,36 @@ def admin():
         lectures[key].append(record)
     return render_template('admin.html', lectures=lectures)
 
-@app.route('/show-attendance/<lecture_name>/<date>/<time>')
+@app.route('/show-attendance/<lecture_name>/<date>/<time>', methods=['GET', 'POST'])
 def show_attendance(lecture_name, date, time):
     attendance_records = load_json_file(ATTENDANCE_FILE, [])
-    filtered_records = [record for record in attendance_records if record['lecture_name'] == lecture_name and record['date'] == date and record['time'] == time]
+    if request.method == 'POST' and 'delete_roll_no' in request.form:
+        delete_roll_no = request.form['delete_roll_no']
+        new_records = []
+        for record in attendance_records:
+            if (
+                record['lecture_name'] == lecture_name and
+                record['date'] == date and
+                record['time'] == time and
+                record['roll_no'] == delete_roll_no
+            ):
+                # Delete the photo file if it exists
+                photo_path = record.get('photo')
+                if photo_path:
+                    abs_photo_path = os.path.join(app.config['UPLOAD_FOLDER'], os.path.basename(photo_path))
+                    if os.path.exists(abs_photo_path):
+                        try:
+                            os.remove(abs_photo_path)
+                        except Exception as e:
+                            logging.error(f"Failed to delete photo {abs_photo_path}: {e}")
+                continue  # Skip adding this record
+            new_records.append(record)
+        save_json_file(ATTENDANCE_FILE, new_records)
+        attendance_records = new_records
+    filtered_records = [
+        record for record in attendance_records
+        if record['lecture_name'] == lecture_name and record['date'] == date and record['time'] == time
+    ]
     return render_template('attendance.html', records=filtered_records)
 
 # Add Socket.IO event handlers
